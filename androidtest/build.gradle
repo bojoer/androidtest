@@ -1,4 +1,24 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:0.8.+'
+        classpath 'com.novoda.gradle:robolectric-plugin:0.0.1-SNAPSHOT'
+    }
+}
+
+allprojects {
+    repositories {
+        mavenCentral()
+        maven { url 'https://oss.sonatype.org/content/repositories/snapshots' }
+    }
+}
+
+
 apply plugin: 'android'
+apply plugin: 'robolectric'
 
 android {
     compileSdkVersion 19
@@ -16,8 +36,14 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
     }
+
+    sourceSets {
+        instrumentTest.setRoot('src/test')
+    }
 }
 
 dependencies {
     compile 'com.android.support:appcompat-v7:+'
+    instrumentTestCompile 'org.robolectric:robolectric:2.+'
+    instrumentTestCompile 'junit:junit:4.+'
 }
