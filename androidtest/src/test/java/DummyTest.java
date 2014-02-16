@@ -1,8 +1,13 @@
 
+import android.content.Intent;
+import android.os.Bundle;
+import android.view.MenuItem;
 import android.widget.Button;
 
 
 import com.example.androidtest.MainActivity;
+import com.example.androidtest.R;
+import com.example.androidtest.ResultActivity;
 
 import junit.framework.Assert;
 
@@ -12,6 +17,9 @@ import org.junit.runner.RunWith;
 import org.robolectric.Robolectric;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
+import org.robolectric.shadows.ShadowActivity;
+import org.robolectric.shadows.ShadowIntent;
+import org.robolectric.tester.android.view.TestMenuItem;
 
 import static junit.framework.Assert.assertEquals;
 
@@ -26,48 +34,43 @@ public class DummyTest {
         mainActivity = Robolectric.buildActivity(MainActivity.class).create().get();
     }
 
-    @Test
-    public void pressingTheButtonShouldStartTheListActivity() throws Exception {
-        mainActivity.getNumberOne().setText("1");
-        mainActivity.getNumberTwo().setText("2");
+    private void performTest(String numberOne, String numberTwo, String expected) {
+        mainActivity.getNumberOne().setText(numberOne);
+        mainActivity.getNumberTwo().setText(numberTwo);
 
-        mainActivity.getCalculationButton().performClick();
+        MenuItem item = new TestMenuItem(R.id.add);
 
-        assertEquals(mainActivity.getTotal().getText().toString(), "Total = 3");
+        mainActivity.onOptionsItemSelected(item);
+
+        ShadowActivity shadowActivity = Robolectric.shadowOf(mainActivity);
+        Intent startedIntent = shadowActivity.getNextStartedActivity();
+        ShadowIntent shadowIntent = Robolectric.shadowOf(startedIntent);
+
+        assertEquals(shadowIntent.getComponent().getClassName(), ResultActivity.class.getName());
+
+        Bundle extras = shadowIntent.getExtras();
+        assertEquals(extras.get("Total").toString(), expected);
     }
 
     @Test
-    public void testMissingFirstInput() throws Exception {
-        mainActivity.getNumberOne().setText("");
-        mainActivity.getNumberTwo().setText("2");
-
-        mainActivity.getCalculationButton().performClick();
-
-        assertEquals(mainActivity.getTotal().getText().toString(), "Total = 2");
-        assertEquals(mainActivity.getNumberOne().getText().toString(), "0");
+    public void addBothNumbers() throws Exception {
+        performTest("1", "2", "3");
     }
 
     @Test
-    public void testMissingSecondInput() throws Exception {
-        mainActivity.getNumberOne().setText("1");
-        mainActivity.getNumberTwo().setText("");
-
-        mainActivity.getCalculationButton().performClick();
-
-        assertEquals(mainActivity.getTotal().getText().toString(), "Total = 1");
-        assertEquals(mainActivity.getNumberTwo().getText().toString(), "0");
+    public void addMissingFirst() throws Exception {
+        performTest("", "2", "2");
     }
 
     @Test
-    public void testMissingBothInputs() throws Exception {
-        mainActivity.getNumberOne().setText("");
-        mainActivity.getNumberTwo().setText("");
-
-        mainActivity.getCalculationButton().performClick();
-
-        assertEquals(mainActivity.getTotal().getText().toString(), "Total = 0");
-        assertEquals(mainActivity.getNumberOne().getText().toString(), "0");
-        assertEquals(mainActivity.getNumberTwo().getText().toString(), "0");
+    public void addMissingSecond() throws Exception {
+        performTest("1", "", "1");
     }
+
+    @Test
+    public void addMissingBoth() throws Exception {
+        performTest("0", "", "0");
+    }
+
 }
 
