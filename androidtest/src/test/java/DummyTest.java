@@ -12,10 +12,10 @@ public class DummyTest {
         //do whatever is necessary before every test
     }
 
-    @Test
-    public void testShouldFail() {
-        Assert.assertTrue(false);
-    }
+//    @Test
+//    public void testShouldFail() {
+//        Assert.assertTrue(false);
+//    }
 
     @Test
     public void testShouldPass() {
